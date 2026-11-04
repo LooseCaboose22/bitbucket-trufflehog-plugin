@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>TruffleHog Secret Scanner — Admin Guide</title>
+<style>
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:14px;line-height:1.6;color:#172b4d;max-width:960px;margin:0 auto;padding:24px;}
+h1{font-size:28px;font-weight:700;border-bottom:2px solid #0052cc;padding-bottom:8px;color:#0052cc;}
+h2{font-size:20px;font-weight:700;color:#172b4d;margin-top:32px;padding:8px 0 4px;border-bottom:1px solid #dfe1e6;}
+h3{font-size:16px;font-weight:700;color:#344563;margin-top:20px;}
+table{width:100%;border-collapse:collapse;margin:16px 0;}
+th{background:#f4f5f7;color:#172b4d;font-weight:600;padding:8px 12px;text-align:left;border:1px solid #dfe1e6;}
+td{padding:8px 12px;border:1px solid #dfe1e6;vertical-align:top;}
+tr:nth-child(even) td{background:#fafbfc;}
+code{font-family:SFMono-Regular,Consolas,monospace;font-size:12px;background:#f4f5f7;padding:2px 5px;border-radius:3px;color:#de350b;}
+pre{background:#f4f5f7;border:1px solid #dfe1e6;border-radius:3px;padding:12px 16px;overflow-x:auto;font-size:12px;}
+pre code{background:none;padding:0;color:#172b4d;}
+.panel{border:1px solid #dfe1e6;border-radius:3px;margin:16px 0;overflow:hidden;}
+.panel-header{padding:8px 12px;font-weight:600;border-bottom:1px solid #dfe1e6;}
+.panel-info .panel-header{background:#deebff;color:#0052cc;border-bottom-color:#b3d4ff;}
+.panel-warning .panel-header{background:#fffae6;color:#172b4d;border-bottom-color:#ffe380;}
+.panel-success .panel-header{background:#e3fcef;color:#006644;border-bottom-color:#abf5d1;}
+.panel-body{padding:12px 16px;}
+.toc{background:#f4f5f7;border:1px solid #dfe1e6;padding:16px 24px;margin-bottom:24px;border-radius:3px;}
+.toc ul{margin:4px 0;padding-left:20px;}
+.toc li{margin:4px 0;}
+a{color:#0052cc;}
+</style>
+</head>
+<body>
+
+<h1>TruffleHog Secret Scanner — Administrator Guide</h1>
+<p><strong>Version 1.5</strong> | Bitbucket Data Center</p>
+
+<div class="toc">
+  <strong>Contents</strong>
+  <ul>
+    <li><a href="#prereqs">Prerequisites &amp; Installation</a></li>
+    <li><a href="#core-config">Core Configuration</a></li>
+    <li><a href="#push-behavior">Push Behavior (v1.2)</a></li>
+    <li><a href="#email">Email Notifications (v1.1)</a></li>
+    <li><a href="#webhooks">Webhook Notifications (v1.1)</a></li>
+    <li><a href="#custom-detectors">Custom Detectors (v1.4)</a></li>
+    <li><a href="#proxy">Proxy Settings (v1.5)</a></li>
+    <li><a href="#datacenter">Data Center Per-Node Paths (v1.5)</a></li>
+    <li><a href="#allowlist">Per-Secret Allowlist</a></li>
+    <li><a href="#export-import">Config Export / Import (v1.5)</a></li>
+    <li><a href="#audit">Audit Log (v1.4)</a></li>
+    <li><a href="#rest-api">REST API Reference</a></li>
+    <li><a href="#troubleshooting">Troubleshooting</a></li>
+  </ul>
+</div>
+
+<h2 id="prereqs">Prerequisites &amp; Installation</h2>
+
+<table>
+<tr><th>Requirement</th><th>Details</th></tr>
+<tr><td>Bitbucket Data Center</td><td>Version 8.x or later</td></tr>
+<tr><td>TruffleHog binary</td><td>v3.x installed on every cluster node</td></tr>
+<tr><td>Permissions</td><td>System Administrator role</td></tr>
+<tr><td>Network</td><td>Outbound HTTPS if secret verification or webhooks are used</td></tr>
+</table>
+
+<h3>Install TruffleHog on each node</h3>
+<pre><code>curl -sSfL https://raw.githubusercontent.com/trufflesecurity/trufflehog/main/scripts/install.sh \
+  | sh -s -- -b /usr/local/bin
+trufflehog --version</code></pre>
+
+<h3>Install the plugin</h3>
+<ol>
+  <li>Log in as System Administrator</li>
+  <li>Navigate to <strong>Administration → Manage apps → Upload app</strong></li>
+  <li>Upload <code>trufflehog-plugin-&lt;version&gt;.jar</code></li>
+  <li>Verify all 15 modules show <strong>Enabled</strong> and not broken</li>
+</ol>
+
+<h2 id="core-config">Core Configuration</h2>
+<p>Navigate to <strong>Administration → TruffleHog Secret Scanner → Settings</strong>.</p>
+
+<table>
+<tr><th>Field</th><th>Description</th><th>Default</th></tr>
+<tr><td>Executable path</td><td>Absolute path to TruffleHog binary</td><td><code>trufflehog</code></td></tr>
+<tr><td>Cron expression</td><td>Quartz cron for scheduled scans</td><td><code>0 0 2 * * ?</code></td></tr>
+<tr><td>Concurrent scans</td><td>Parallel repos during full scan</td><td>4</td></tr>
+<tr><td>Scan timeout (min)</td><td>Kill scan if it exceeds this</td><td>30</td></tr>
+<tr><td>Verification filter</td><td>Both / Verified only / Unverified only</td><td>Both</td></tr>
+</table>
+
+<h2 id="push-behavior">Push Behavior (v1.2)</h2>
+
+<table>
+<tr><th>Mode</th><th>Behavior</th></tr>
+<tr><td><strong>Block</strong></td><td>Rejects pushes with secrets on matching branches</td></tr>
+<tr><td><strong>Warn</strong></td><td>Allows push but logs findings and sends notifications</td></tr>
+<tr><td><strong>Silent</strong></td><td>Background scan, no blocking or notification</td></tr>
+</table>
+
+<table>
+<tr><th>Setting</th><th>Description</th></tr>
+<tr><td>Block branch patterns</td><td>Branches where BLOCK applies, e.g. <code>main,master,release/*</code></td></tr>
+<tr><td>Warn branch patterns</td><td>Branches that downgrade to WARN, e.g. <code>feature/*</code></td></tr>
+<tr><td>Excluded pushers</td><td>Usernames whose pushes skip scanning (CI service accounts)</td></tr>
+<tr><td>Max file size (KB)</td><td>Skip files larger than this (0 = no limit)</td></tr>
+<tr><td>Max total scan size (MB)</td><td>Abort scan if repo total data exceeds this (0 = no limit)</td></tr>
+</table>
+
+<h2 id="email">Email Notifications (v1.1)</h2>
+
+<div class="panel panel-info">
+  <div class="panel-header">Two delivery options</div>
+  <div class="panel-body">
+    <strong>Option A — Bitbucket Mail Server:</strong> Leave all SMTP fields blank. Uses the server from <em>Administration → Mail server</em>.<br/><br/>
+    <strong>Option B — Direct SMTP:</strong> Fill in the SMTP fields to bypass Bitbucket's mail server.
+  </div>
+</div>
+
+<table>
+<tr><th>Field</th><th>Description</th></tr>
+<tr><td>SMTP host</td><td>e.g., <code>smtp.office365.com</code></td></tr>
+<tr><td>SMTP port</td><td>587 (STARTTLS) or 465 (SSL)</td></tr>
+<tr><td>Use TLS</td><td>Enable STARTTLS</td></tr>
+<tr><td>From address</td><td>Override From header, e.g. <code>trufflehog@company.com</code></td></tr>
+</table>
+
+<p>Use the <strong>Send test</strong> button to verify before saving.</p>
+
+<p>Notification mode: <strong>Immediate</strong> fires after every scan with new findings; <strong>Daily digest</strong> batches and sends once per day at the configured UTC hour.</p>
+
+<h2 id="webhooks">Webhook Notifications (v1.1)</h2>
+<ol>
+  <li>Create an Incoming Webhook in Teams or Slack</li>
+  <li>Paste the URL into the corresponding field in Settings</li>
+  <li>Click <strong>Test</strong> to verify</li>
+</ol>
+<p>Payload: <code>{"text": "[TruffleHog] N new secret(s) found in PROJECT/repo (V verified)."}</code></p>
+
+<h2 id="custom-detectors">Custom Detectors (v1.4)</h2>
+
+<table>
+<tr><th>Setting</th><th>Description</th></tr>
+<tr><td>Warn-only detectors</td><td>These detectors never block pushes (e.g., <code>Entropy, Generic</code>)</td></tr>
+<tr><td>Custom detector config path</td><td>Absolute path to a TruffleHog <code>--config</code> YAML file</td></tr>
+</table>
+
+<h2 id="proxy">Proxy Settings (v1.5)</h2>
+
+<table>
+<tr><th>Field</th><th>Description</th></tr>
+<tr><td>HTTP/HTTPS proxy URL</td><td>e.g., <code>http://proxy.corp.local:3128</code></td></tr>
+<tr><td>No-proxy hosts</td><td>Comma-separated hosts/CIDRs bypassing the proxy</td></tr>
+<tr><td>Custom SSL certificate</td><td>PEM/CRT path for a self-signed CA; sets <code>SSL_CERT_FILE</code></td></tr>
+</table>
+
+<h2 id="datacenter">Data Center Per-Node Binary Paths (v1.5)</h2>
+<p>In clustered deployments, enter one <code>nodeName=path</code> mapping per line:</p>
+<pre><code>node1=/usr/local/bin/trufflehog
+node2=/opt/trufflehog/bin/trufflehog</code></pre>
+<p>Nodes without an entry use the global Executable path.</p>
+
+<h2 id="allowlist">Per-Secret Allowlist</h2>
+<p>Permanently suppress a specific finding by adding its SHA-256 fingerprint to the allowlist. Allowlisted findings are invisible in all dashboards and do not trigger notifications.</p>
+
+<h2 id="export-import">Config Export / Import (v1.5)</h2>
+<p>Export settings as JSON (passwords omitted) for backup or environment replication. Import preserves existing passwords if absent in the imported file.</p>
+
+<h2 id="audit">Audit Log (v1.4)</h2>
+<p>Records all administrative actions including push scans, test notifications, and config imports. Accessible in <strong>Settings → Audit log</strong> and via:</p>
+<pre><code>GET /rest/th-scanner/1.0/audit?limit=100</code></pre>
+
+<h2 id="rest-api">REST API Reference</h2>
+<p>Base URL: <code>/rest/th-scanner/1.0/</code></p>
+<table>
+<tr><th>Method</th><th>Path</th><th>Description</th></tr>
+<tr><td>GET</td><td><code>settings</code></td><td>Retrieve settings</td></tr>
+<tr><td>PUT</td><td><code>settings</code></td><td>Update settings</td></tr>
+<tr><td>GET</td><td><code>findings</code></td><td>List findings</td></tr>
+<tr><td>PUT</td><td><code>findings/{id}/status</code></td><td>Update finding status</td></tr>
+<tr><td>POST</td><td><code>scan/all</code></td><td>Trigger full system scan</td></tr>
+<tr><td>POST</td><td><code>scan/repository/{key}/{slug}</code></td><td>Trigger repo scan</td></tr>
+<tr><td>GET</td><td><code>audit</code></td><td>List audit log entries</td></tr>
+<tr><td>POST</td><td><code>notifications/test</code></td><td>Send test notification</td></tr>
+<tr><td>GET</td><td><code>config/export</code></td><td>Export settings as JSON</td></tr>
+<tr><td>POST</td><td><code>config/import</code></td><td>Import settings from JSON</td></tr>
+</table>
+
+<h2 id="troubleshooting">Troubleshooting</h2>
+<table>
+<tr><th>Symptom</th><th>Likely Cause</th><th>Fix</th></tr>
+<tr><td>Modules broken in UPM</td><td>AO table name > 30 chars</td><td>Check <code>@Table</code> annotations</td></tr>
+<tr><td>Post-receive hook not firing</td><td>Hook disabled on repo</td><td>Enable in Repository Settings → Hooks</td></tr>
+<tr><td>Scans timing out</td><td>Large repo or slow verification</td><td>Increase <code>scanTimeoutMinutes</code>, add size limits</td></tr>
+<tr><td>No emails delivered</td><td>SMTP misconfigured</td><td>Use Send test button; check mail server config</td></tr>
+<tr><td>TruffleHog binary not found</td><td>Wrong path</td><td>Verify path on each Bitbucket node</td></tr>
+</table>
+
+</body>
+</html>

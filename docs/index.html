@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>TruffleHog Secret Scanner — Project Overview</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;background:#f0f2f5;color:#172b4d;line-height:1.6;}
+
+  .hero{background:linear-gradient(135deg,#0052cc 0%,#0747a6 100%);color:#fff;padding:56px 32px 48px;text-align:center;}
+  .hero h1{font-size:36px;font-weight:700;margin-bottom:12px;letter-spacing:-0.5px;}
+  .hero p{font-size:17px;opacity:.88;max-width:620px;margin:0 auto 24px;}
+  .hero-badges{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+  .badge{display:inline-block;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;background:rgba(255,255,255,0.18);color:#fff;border:1px solid rgba(255,255,255,0.3);}
+
+  .container{max-width:1100px;margin:0 auto;padding:40px 24px;}
+
+  /* Section headings */
+  .section-heading{font-size:20px;font-weight:700;color:#172b4d;margin:40px 0 20px;padding-bottom:8px;border-bottom:2px solid #dfe1e6;}
+
+  /* Feature grid */
+  .feature-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px;margin-bottom:40px;}
+  .feature-card{background:#fff;border-radius:8px;padding:20px 24px;box-shadow:0 1px 3px rgba(0,0,0,.1);border-top:4px solid #0052cc;}
+  .feature-card .version{font-size:11px;font-weight:700;color:#0052cc;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;}
+  .feature-card h3{font-size:16px;font-weight:700;margin-bottom:8px;}
+  .feature-card p{font-size:13px;color:#42526e;line-height:1.5;}
+  .feature-card ul{font-size:13px;color:#42526e;padding-left:16px;margin-top:8px;}
+  .feature-card li{margin-bottom:4px;}
+
+  /* Benefits */
+  .benefit-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;margin-bottom:40px;}
+  .benefit-item{background:#fff;border-radius:8px;padding:16px 20px;box-shadow:0 1px 3px rgba(0,0,0,.1);text-align:center;}
+  .benefit-item .icon{font-size:28px;margin-bottom:8px;}
+  .benefit-item h4{font-size:14px;font-weight:700;margin-bottom:6px;}
+  .benefit-item p{font-size:12px;color:#42526e;}
+
+  /* Doc cards */
+  .doc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;margin-bottom:40px;}
+  .doc-card{background:#fff;border-radius:8px;padding:20px 24px;box-shadow:0 1px 3px rgba(0,0,0,.1);text-decoration:none;color:inherit;display:block;border-left:4px solid #dfe1e6;transition:border-left-color .15s,box-shadow .15s;}
+  .doc-card:hover{border-left-color:#0052cc;box-shadow:0 4px 12px rgba(0,82,204,.15);}
+  .doc-card .doc-type{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#5e6c84;margin-bottom:6px;}
+  .doc-card h3{font-size:15px;font-weight:700;color:#172b4d;margin-bottom:6px;}
+  .doc-card p{font-size:13px;color:#42526e;}
+  .doc-card .doc-format{margin-top:10px;font-size:11px;color:#5e6c84;}
+  .format-tag{display:inline-block;padding:2px 6px;border-radius:3px;background:#f4f5f7;margin-right:4px;font-size:11px;}
+
+  /* Screenshots section */
+  .screenshot-note{background:#fffae6;border:1px solid #ffe380;border-radius:8px;padding:16px 20px;margin-bottom:24px;font-size:13px;color:#172b4d;}
+  .screenshot-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-bottom:40px;}
+  .screenshot-placeholder{background:#f4f5f7;border:2px dashed #c1c7d0;border-radius:8px;padding:40px 20px;text-align:center;}
+  .screenshot-placeholder .icon{font-size:32px;margin-bottom:8px;}
+  .screenshot-placeholder p{font-size:13px;color:#5e6c84;margin:0;}
+  .screenshot-placeholder strong{display:block;font-size:14px;color:#172b4d;margin-bottom:4px;}
+
+  /* Architecture diagram */
+  .arch-box{background:#fff;border-radius:8px;padding:28px;box-shadow:0 1px 3px rgba(0,0,0,.1);margin-bottom:40px;}
+  .arch-flow{display:flex;align-items:center;gap:0;flex-wrap:wrap;justify-content:center;margin:20px 0;}
+  .arch-node{background:#deebff;border:1px solid #b3d4ff;border-radius:6px;padding:10px 16px;font-size:13px;font-weight:600;color:#0052cc;text-align:center;min-width:110px;}
+  .arch-node.secondary{background:#f4f5f7;border-color:#dfe1e6;color:#344563;}
+  .arch-arrow{font-size:20px;color:#5e6c84;padding:0 8px;}
+
+  footer{text-align:center;padding:24px;font-size:12px;color:#5e6c84;border-top:1px solid #dfe1e6;background:#fff;margin-top:20px;}
+  a{color:#0052cc;text-decoration:none;}
+  a:hover{text-decoration:underline;}
+</style>
+</head>
+<body>
+
+<!-- Hero -->
+<div class="hero">
+  <h1>&#128273; TruffleHog Secret Scanner</h1>
+  <p>Automated secret detection for Bitbucket Data Center — catches leaked API keys, passwords, and credentials before they become incidents.</p>
+  <div class="hero-badges">
+    <span class="badge">Bitbucket Data Center 8.x</span>
+    <span class="badge">TruffleHog v3</span>
+    <span class="badge">700+ Detectors</span>
+    <span class="badge">v1.5</span>
+    <span class="badge">OSGi / Active Objects</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- Value proposition -->
+  <div class="section-heading">Why TruffleHog Secret Scanner?</div>
+  <div class="benefit-row">
+    <div class="benefit-item">
+      <div class="icon">&#128274;</div>
+      <h4>Prevent Credential Exposure</h4>
+      <p>Catch secrets the moment they are pushed — before they reach shared or public branches</p>
+    </div>
+    <div class="benefit-item">
+      <div class="icon">&#9989;</div>
+      <h4>Verified Detection</h4>
+      <p>TruffleHog checks credentials against live APIs to confirm they are valid, reducing noise</p>
+    </div>
+    <div class="benefit-item">
+      <div class="icon">&#128202;</div>
+      <h4>Full Audit Trail</h4>
+      <p>Every finding, status change, and configuration action is logged and searchable</p>
+    </div>
+    <div class="benefit-item">
+      <div class="icon">&#9878;&#65039;</div>
+      <h4>Compliance Evidence</h4>
+      <p>Demonstrates active secret-management controls for SOC 2, ISO 27001, and PCI-DSS</p>
+    </div>
+    <div class="benefit-item">
+      <div class="icon">&#128268;</div>
+      <h4>Zero External Deps</h4>
+      <p>Runs entirely within Bitbucket's OSGi container; no external SaaS or cloud service required</p>
+    </div>
+    <div class="benefit-item">
+      <div class="icon">&#128272;</div>
+      <h4>Developer Friendly</h4>
+      <p>Warn on feature branches, block only on protected ones — security without friction</p>
+    </div>
+  </div>
+
+  <!-- How it works -->
+  <div class="section-heading">How It Works</div>
+  <div class="arch-box">
+    <div class="arch-flow">
+      <div class="arch-node">Developer push</div>
+      <div class="arch-arrow">&#8594;</div>
+      <div class="arch-node">Post-receive hook</div>
+      <div class="arch-arrow">&#8594;</div>
+      <div class="arch-node">TruffleHog v3 binary</div>
+      <div class="arch-arrow">&#8594;</div>
+      <div class="arch-node">Findings stored (AO)</div>
+      <div class="arch-arrow">&#8594;</div>
+      <div class="arch-node">Notifications</div>
+    </div>
+    <div class="arch-flow">
+      <div class="arch-node secondary">Cron scheduler</div>
+      <div class="arch-arrow">&#8594;</div>
+      <div class="arch-node secondary">Full repo scan</div>
+      <div class="arch-arrow">&#8594;</div>
+      <div class="arch-node secondary">Dashboard &amp; REST API</div>
+      <div class="arch-arrow">&#8594;</div>
+      <div class="arch-node secondary">Remediation workflow</div>
+    </div>
+    <p style="font-size:13px;color:#5e6c84;margin-top:12px;text-align:center;">Secrets are never stored in plaintext. Only the fingerprint (SHA-256) and redacted value are persisted.</p>
+  </div>
+
+  <!-- Feature versions -->
+  <div class="section-heading">Feature Roadmap &amp; Capabilities</div>
+  <div class="feature-grid">
+
+    <div class="feature-card">
+      <div class="version">v1.0 — Core</div>
+      <h3>Secret Detection Foundation</h3>
+      <p>Everything needed to start detecting and tracking secrets across all repositories.</p>
+      <ul>
+        <li>Post-receive hook scanning</li>
+        <li>Scheduled full-system scans</li>
+        <li>Findings dashboard (system / project / repo)</li>
+        <li>Remediation workflow with notes</li>
+        <li>Per-secret fingerprint allowlist</li>
+        <li>File and directory exclusions</li>
+      </ul>
+    </div>
+
+    <div class="feature-card" style="border-top-color:#00875a;">
+      <div class="version" style="color:#00875a;">v1.1 — Notifications</div>
+      <h3>Email &amp; Webhook Alerts</h3>
+      <p>Notify the right people the moment secrets are detected.</p>
+      <ul>
+        <li>Direct SMTP support (bypass Bitbucket mail server)</li>
+        <li>Microsoft Teams webhook integration</li>
+        <li>Slack webhook integration</li>
+        <li>Immediate vs. daily digest mode</li>
+        <li>Test buttons for all notification channels</li>
+        <li>Separate committer / admin / infosec recipients</li>
+      </ul>
+    </div>
+
+    <div class="feature-card" style="border-top-color:#ff5630;">
+      <div class="version" style="color:#ff5630;">v1.2 — Push Enforcement</div>
+      <h3>Block, Warn, or Monitor</h3>
+      <p>Fine-grained control over how the scanner responds to pushes.</p>
+      <ul>
+        <li>Block / Warn / Silent push result modes</li>
+        <li>Branch pattern matching (exact + glob)</li>
+        <li>Excluded pusher usernames (CI service accounts)</li>
+        <li>Max file size and total scan size limits</li>
+      </ul>
+    </div>
+
+    <div class="feature-card" style="border-top-color:#8777d9;">
+      <div class="version" style="color:#8777d9;">v1.3 — Dashboards</div>
+      <h3>Metrics &amp; Reporting</h3>
+      <p>Visual insights into secret detection trends and remediation health.</p>
+      <ul>
+        <li>Scan outcomes donut chart (New / Recurring / Resolved)</li>
+        <li>Top detectors by finding count</li>
+        <li>Top repositories by open finding count</li>
+        <li>Recent events table</li>
+        <li>CSV export for all findings</li>
+      </ul>
+    </div>
+
+    <div class="feature-card" style="border-top-color:#ff991f;">
+      <div class="version" style="color:#ff991f;">v1.4 — Custom Detectors</div>
+      <h3>Tuning &amp; Audit</h3>
+      <p>Reduce noise and add custom detectors tailored to your stack.</p>
+      <ul>
+        <li>Warn-only detector classification (no blocking)</li>
+        <li>Custom detector config path (TruffleHog YAML)</li>
+        <li>Audit log for all admin actions</li>
+        <li>Audit log REST endpoint</li>
+      </ul>
+    </div>
+
+    <div class="feature-card" style="border-top-color:#36b37e;">
+      <div class="version" style="color:#36b37e;">v1.5 — Enterprise / Data Center</div>
+      <h3>Cluster &amp; Proxy Support</h3>
+      <p>Production-ready for multi-node clustered deployments.</p>
+      <ul>
+        <li>Per-node TruffleHog binary path configuration</li>
+        <li>HTTP/HTTPS proxy settings with auth</li>
+        <li>Custom SSL certificate for self-signed proxies</li>
+        <li>Configuration export / import (JSON)</li>
+        <li>No-proxy host bypass list</li>
+      </ul>
+    </div>
+
+  </div>
+
+  <!-- Documentation -->
+  <div class="section-heading">Documentation</div>
+  <div class="doc-grid">
+
+    <a class="doc-card" href="user-guide.md">
+      <div class="doc-type">User Guide</div>
+      <h3>&#128196; For Developers</h3>
+      <p>Push behavior, viewing findings, responding to alerts, FAQ for common scenarios.</p>
+      <div class="doc-format">
+        <span class="format-tag">Markdown</span>
+      </div>
+    </a>
+
+    <a class="doc-card" href="user-guide-confluence.html">
+      <div class="doc-type">User Guide</div>
+      <h3>&#127760; For Developers (Confluence)</h3>
+      <p>Same content formatted for pasting directly into a Confluence page.</p>
+      <div class="doc-format">
+        <span class="format-tag">Confluence HTML</span>
+      </div>
+    </a>
+
+    <a class="doc-card" href="admin-guide.md">
+      <div class="doc-type">Admin Guide</div>
+      <h3>&#128295; For Bitbucket Administrators</h3>
+      <p>Installation, all configuration options, REST API reference, troubleshooting.</p>
+      <div class="doc-format">
+        <span class="format-tag">Markdown</span>
+      </div>
+    </a>
+
+    <a class="doc-card" href="admin-guide-confluence.html">
+      <div class="doc-type">Admin Guide</div>
+      <h3>&#127760; For Administrators (Confluence)</h3>
+      <p>Admin guide formatted for Confluence with tables and styled panels.</p>
+      <div class="doc-format">
+        <span class="format-tag">Confluence HTML</span>
+      </div>
+    </a>
+
+    <a class="doc-card" href="runbook.md">
+      <div class="doc-type">Runbook</div>
+      <h3>&#128736; Operations &amp; Incident Response</h3>
+      <p>Health checks, common operational tasks, 7 incident response playbooks, maintenance procedures.</p>
+      <div class="doc-format">
+        <span class="format-tag">Markdown</span>
+      </div>
+    </a>
+
+    <a class="doc-card" href="outlook-summary.html">
+      <div class="doc-type">Management Summary</div>
+      <h3>&#128231; Outlook Email Summary</h3>
+      <p>A formatted HTML email suitable for sending to management as a project overview.</p>
+      <div class="doc-format">
+        <span class="format-tag">Outlook HTML</span>
+      </div>
+    </a>
+
+  </div>
+
+  <!-- Screenshots -->
+  <div class="section-heading">Screenshots</div>
+  <div class="screenshot-note">
+    &#128247; Screenshots will be added here once captured from the running Bitbucket instance. Use the paths below as references when embedding screenshots from the <code>screenshots/</code> folder.
+  </div>
+  <div class="screenshot-grid">
+
+    <div class="screenshot-placeholder">
+      <div class="icon">&#128202;</div>
+      <strong>System Dashboard</strong>
+      <p>Global findings overview, scan outcomes chart, top repositories</p>
+      <p style="margin-top:8px;font-size:11px;color:#8993a4;">screenshots/system-dashboard.png</p>
+    </div>
+
+    <div class="screenshot-placeholder">
+      <div class="icon">&#128269;</div>
+      <strong>Finding Detail</strong>
+      <p>File path, line number, commit, verified status, remediation history</p>
+      <p style="margin-top:8px;font-size:11px;color:#8993a4;">screenshots/finding-detail.png</p>
+    </div>
+
+    <div class="screenshot-placeholder">
+      <div class="icon">&#9881;&#65039;</div>
+      <strong>Admin Settings — Core</strong>
+      <p>Executable path, cron, detection filters, scope configuration</p>
+      <p style="margin-top:8px;font-size:11px;color:#8993a4;">screenshots/admin-settings-core.png</p>
+    </div>
+
+    <div class="screenshot-placeholder">
+      <div class="icon">&#128233;</div>
+      <strong>Admin Settings — Notifications</strong>
+      <p>SMTP configuration, Teams/Slack webhooks with test buttons</p>
+      <p style="margin-top:8px;font-size:11px;color:#8993a4;">screenshots/admin-settings-notifications.png</p>
+    </div>
+
+    <div class="screenshot-placeholder">
+      <div class="icon">&#128682;</div>
+      <strong>Admin Settings — Push Behavior</strong>
+      <p>Block/Warn/Silent mode selector, branch patterns, excluded pushers</p>
+      <p style="margin-top:8px;font-size:11px;color:#8993a4;">screenshots/admin-settings-push.png</p>
+    </div>
+
+    <div class="screenshot-placeholder">
+      <div class="icon">&#128196;</div>
+      <strong>Audit Log</strong>
+      <p>Recent admin actions: scans triggered, config changes, test notifications</p>
+      <p style="margin-top:8px;font-size:11px;color:#8993a4;">screenshots/admin-audit-log.png</p>
+    </div>
+
+    <div class="screenshot-placeholder">
+      <div class="icon">&#128203;</div>
+      <strong>Repository Dashboard</strong>
+      <p>Findings scoped to a single repository with filter and sort options</p>
+      <p style="margin-top:8px;font-size:11px;color:#8993a4;">screenshots/repo-dashboard.png</p>
+    </div>
+
+    <div class="screenshot-placeholder">
+      <div class="icon">&#128455;</div>
+      <strong>Push Rejected (BLOCK mode)</strong>
+      <p>Git client output when a push is blocked due to a verified secret</p>
+      <p style="margin-top:8px;font-size:11px;color:#8993a4;">screenshots/push-blocked.png</p>
+    </div>
+
+  </div>
+
+  <!-- Technical summary -->
+  <div class="section-heading">Technical Summary</div>
+  <div style="background:#fff;border-radius:8px;padding:24px;box-shadow:0 1px 3px rgba(0,0,0,.1);margin-bottom:40px;">
+    <table style="width:100%;border-collapse:collapse;">
+      <tr style="background:#f4f5f7;">
+        <th style="padding:8px 16px;text-align:left;font-size:13px;border:1px solid #dfe1e6;width:200px;">Component</th>
+        <th style="padding:8px 16px;text-align:left;font-size:13px;border:1px solid #dfe1e6;">Details</th>
+      </tr>
+      <tr>
+        <td style="padding:8px 16px;font-size:13px;border:1px solid #dfe1e6;font-weight:600;">Platform</td>
+        <td style="padding:8px 16px;font-size:13px;border:1px solid #dfe1e6;">Bitbucket Data Center 8.x, OSGi, Spring (atlassian-spring-scanner 3.0.4)</td>
+      </tr>
+      <tr style="background:#fafbfc;">
+        <td style="padding:8px 16px;font-size:13px;border:1px solid #dfe1e6;font-weight:600;">Persistence</td>
+        <td style="padding:8px 16px;font-size:13px;border:1px solid #dfe1e6;">Active Objects (cluster-safe JPA), 6 AO tables (<code>AO_501204_*</code>)</td>
+      </tr>
+      <tr>
+        <td style="padding:8px 16px;font-size:13px;border:1px solid #dfe1e6;font-weight:600;">Secret engine</td>
+        <td style="padding:8px 16px;font-size:13px;border:1px solid #dfe1e6;">TruffleHog v3 CLI binary — 700+ detectors, live verification against external APIs</td>
+      </tr>
+      <tr style="background:#fafbfc;">
+        <td style="padding:8px 16px;font-size:13px;border:1px solid #dfe1e6;font-weight:600;">Notifications</td>
+        <td style="padding:8px 16px;font-size:13px;border:1px solid #dfe1e6;">OSGi-reflected Bitbucket mail server or direct SMTP; Teams/Slack via <code>HttpURLConnection</code></td>
+      </tr>
+      <tr>
+        <td style="padding:8px 16px;font-size:13px;border:1px solid #dfe1e6;font-weight:600;">REST API</td>
+        <td style="padding:8px 16px;font-size:13px;border:1px solid #dfe1e6;">14 endpoints under <code>/rest/th-scanner/1.0/</code>, JAX-RS</td>
+      </tr>
+      <tr style="background:#fafbfc;">
+        <td style="padding:8px 16px;font-size:13px;border:1px solid #dfe1e6;font-weight:600;">Build</td>
+        <td style="padding:8px 16px;font-size:13px;border:1px solid #dfe1e6;">Maven (<code>atlas-mvn package</code>), Atlassian Plugin SDK, WSL build workflow</td>
+      </tr>
+      <tr>
+        <td style="padding:8px 16px;font-size:13px;border:1px solid #dfe1e6;font-weight:600;">Plugin key</td>
+        <td style="padding:8px 16px;font-size:13px;border:1px solid #dfe1e6;font-family:monospace;">com.acme.bitbucket.trufflehog</td>
+      </tr>
+    </table>
+  </div>
+
+</div>
+
+<footer>
+  TruffleHog Secret Scanner Plugin &nbsp;·&nbsp; Bitbucket Data Center &nbsp;·&nbsp; Version 1.5 &nbsp;·&nbsp; Built with TruffleHog v3 OSS
+</footer>
+
+</body>
+</html>

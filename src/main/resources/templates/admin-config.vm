@@ -1,0 +1,563 @@
+<html>
+<head>
+    <title>TruffleHog &#8212; Scanner Settings</title>
+    <meta name="decorator" content="atl.admin"/>
+    <meta name="admin.menu.section" content="atl.admin/trufflehog-admin-section"/>
+    <meta name="admin.menu.item" content="trufflehog-admin-settings-link"/>
+    <link rel="stylesheet" href="${contextPath}/download/resources/com.acme.bitbucket.trufflehog:trufflehog-admin-resources/th-dashboard.css"/>
+</head>
+<body>
+
+<div class="th-page-bar">
+    <div>
+        <h2 class="th-page-h2">TruffleHog &#8212; Scanner Settings</h2>
+        <div class="th-page-crumbs">
+            <a href="${contextPath}/plugins/servlet/trufflehog/dashboard/system">Dashboard</a> / Settings
+        </div>
+    </div>
+    <div class="th-actions">
+        <a class="aui-button" href="${contextPath}/plugins/servlet/trufflehog/dashboard/system">&#8592; Back to dashboard</a>
+    </div>
+</div>
+
+<div class="th-container">
+<form id="th-settings-form">
+
+    <div class="th-form-card">
+        <div class="th-form-legend">TruffleHog binary</div>
+        <div class="th-form-rows">
+            <div class="th-form-row">
+                <div class="th-form-lbl"><label for="th-trufflehogExecutable">Executable path</label>
+                    <small>Absolute path or command on PATH for the TruffleHog v3 binary.</small></div>
+                <div class="th-form-ctrl"><input type="text" id="th-trufflehogExecutable" name="trufflehogExecutable" value="${trufflehogExecutable}"/></div>
+            </div>
+            <div class="th-form-row">
+                <div class="th-form-lbl"><label for="th-repositoriesRoot">Repositories root</label>
+                    <small>Leave blank to use Bitbucket's built-in repositories directory.</small></div>
+                <div class="th-form-ctrl"><input type="text" id="th-repositoriesRoot" name="repositoriesRoot" value="${repositoriesRoot}"/></div>
+            </div>
+            <div class="th-form-row">
+                <div class="th-form-lbl"><label for="th-extraArgs">Extra CLI args</label>
+                    <small>Passed verbatim to trufflehog, e.g. <code>--only-verified --no-update</code>.</small></div>
+                <div class="th-form-ctrl"><input type="text" id="th-extraArgs" name="extraArgs" value="${extraArgs}"/></div>
+            </div>
+            <div class="th-form-row">
+                <div class="th-form-lbl"><label for="th-allowlistRegex">Allowlist regex</label>
+                    <small>Secrets whose redacted value matches this regex are silently skipped.</small></div>
+                <div class="th-form-ctrl"><input type="text" id="th-allowlistRegex" name="allowlistRegex" value="${allowlistRegex}"/></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="th-form-card">
+        <div class="th-form-legend">Scheduling &amp; scan limits</div>
+        <div class="th-form-rows">
+            <div class="th-form-row">
+                <div class="th-form-lbl"><label for="th-cronExpression">Cron expression</label>
+                    <small>Quartz cron for scheduled full scans, e.g. <code>0 0 2 * * ?</code> (daily at 02:00 UTC).</small></div>
+                <div class="th-form-ctrl"><input type="text" id="th-cronExpression" name="cronExpression" value="${cronExpression}"/></div>
+            </div>
+            <div class="th-form-row">
+                <div class="th-form-lbl"><label for="th-maxConcurrentScans">Concurrent scans</label>
+                    <small>How many repositories to scan in parallel during a full scan.</small></div>
+                <div class="th-form-ctrl"><input type="number" min="1" id="th-maxConcurrentScans" name="maxConcurrentScans" value="${maxConcurrentScans}"/></div>
+            </div>
+            <div class="th-form-row">
+                <div class="th-form-lbl"><label for="th-scanTimeoutMinutes">Scan timeout (minutes)</label>
+                    <small>Each repository scan is killed if it runs longer than this.</small></div>
+                <div class="th-form-ctrl"><input type="number" min="1" id="th-scanTimeoutMinutes" name="scanTimeoutMinutes" value="${scanTimeoutMinutes}"/></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="th-form-card">
+        <div class="th-form-legend">Detection filters</div>
+        <div class="th-form-rows">
+            <div class="th-form-row">
+                <div class="th-form-lbl"><label for="th-verifiedFilter">Verification filter</label>
+                    <small>Which findings to record. <em>Both</em> is recommended unless you have very high noise.</small></div>
+                <div class="th-form-ctrl">
+                    <select id="th-verifiedFilter" name="verifiedFilter" class="th-select">
+                        <option value="BOTH"          #if ($verifiedFilter == "BOTH")          selected="selected" #end>Both verified and unverified</option>
+                        <option value="VERIFIED_ONLY" #if ($verifiedFilter == "VERIFIED_ONLY") selected="selected" #end>Verified only</option>
+                        <option value="UNVERIFIED_ONLY" #if ($verifiedFilter == "UNVERIFIED_ONLY") selected="selected" #end>Unverified only</option>
+                    </select>
+                </div>
+            </div>
+            <div class="th-form-row">
+                <div class="th-form-lbl"><label for="th-detectorAllowlist">Detector allowlist</label>
+                    <small>Only report findings from these detectors (one per line or comma-separated). Leave blank to scan for all secret types.
+                    Examples: <code>AWS, Azure, PrivateKey, GitHub, Slack, Stripe</code></small></div>
+                <div class="th-form-ctrl"><textarea id="th-detectorAllowlist" name="detectorAllowlist" class="th-textarea" rows="4" placeholder="Leave blank to include all detectors">${detectorAllowlist}</textarea></div>
+            </div>
+            <div class="th-form-row">
+                <div class="th-form-lbl"><label for="th-detectorIgnorelist">Detector ignorelist</label>
+                    <small>Never report findings from these detectors (one per line or comma-separated). Takes precedence over the allowlist.</small></div>
+                <div class="th-form-ctrl"><textarea id="th-detectorIgnorelist" name="detectorIgnorelist" class="th-textarea" rows="3" placeholder="Leave blank to ignore nothing">${detectorIgnorelist}</textarea></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="th-form-card">
+        <div class="th-form-legend">Email notifications</div>
+        <small class="th-form-card-note">Emails are sent via the SMTP server configured in <strong>Bitbucket Administration &rarr; Mail server</strong>.
+        Templates support: <code>{{repository}}</code>, <code>{{project}}</code>, <code>{{detector}}</code>,
+        <code>{{file}}</code>, <code>{{branch}}</code>, <code>{{commit}}</code>, <code>{{count}}</code>.</small>
+
+        <div class="th-form-subhead">Notify committer</div>
+        <div class="th-form-rows">
+            <div class="th-form-row">
+                <div class="th-form-lbl">Send to committer
+                    <small>Email the author of the commit that introduced the secret (uses the Git commit email).</small></div>
+                <div class="th-form-ctrl"><div class="th-form-chk">
+                    <input type="checkbox" id="th-notifyCommitter" name="notifyCommitter" #if ($notifyCommitter) checked="checked" #end/>
+                    <label for="th-notifyCommitter">Enabled</label>
+                </div></div>
+            </div>
+            <div class="th-form-row">
+                <div class="th-form-lbl"><label for="th-committerSubject">Subject</label></div>
+                <div class="th-form-ctrl"><input type="text" id="th-committerSubject" name="committerSubject" value="${committerSubject}"/></div>
+            </div>
+            <div class="th-form-row">
+                <div class="th-form-lbl"><label for="th-committerBody">Body</label>
+                    <small>Plain-text email body sent to the committer.</small></div>
+                <div class="th-form-ctrl"><textarea id="th-committerBody" name="committerBody" class="th-textarea" rows="7">${committerBody}</textarea></div>
+            </div>
+        </div>
+
+        <div class="th-form-subhead">Notify administrators</div>
+        <div class="th-form-rows">
+            <div class="th-form-row">
+                <div class="th-form-lbl">Send to admins
+                    <small>Send an aggregated summary to the addresses below after each scan that produces new findings.</small></div>
+                <div class="th-form-ctrl"><div class="th-form-chk">
+                    <input type="checkbox" id="th-notifyAdmins" name="notifyAdmins" #if ($notifyAdmins) checked="checked" #end/>
+                    <label for="th-notifyAdmins">Enabled</label>
+                </div></div>
+            </div>
+            <div class="th-form-row">
+                <div class="th-form-lbl"><label for="th-adminRecipients">Recipients</label>
+                    <small>One email address per line (or comma-separated).</small></div>
+                <div class="th-form-ctrl"><textarea id="th-adminRecipients" name="adminRecipients" class="th-textarea" rows="3" placeholder="admin@example.com">${adminRecipients}</textarea></div>
+            </div>
+            <div class="th-form-row">
+                <div class="th-form-lbl"><label for="th-adminSubject">Subject</label></div>
+                <div class="th-form-ctrl"><input type="text" id="th-adminSubject" name="adminSubject" value="${adminSubject}"/></div>
+            </div>
+        </div>
+
+        <div class="th-form-subhead">Notify infosec team</div>
+        <div class="th-form-rows">
+            <div class="th-form-row">
+                <div class="th-form-lbl">Send to infosec
+                    <small>Send an aggregated summary to the security team after each scan that produces new findings.</small></div>
+                <div class="th-form-ctrl"><div class="th-form-chk">
+                    <input type="checkbox" id="th-notifyInfosec" name="notifyInfosec" #if ($notifyInfosec) checked="checked" #end/>
+                    <label for="th-notifyInfosec">Enabled</label>
+                </div></div>
+            </div>
+            <div class="th-form-row">
+                <div class="th-form-lbl"><label for="th-infosecRecipients">Recipients</label>
+                    <small>One email address per line (or comma-separated).</small></div>
+                <div class="th-form-ctrl"><textarea id="th-infosecRecipients" name="infosecRecipients" class="th-textarea" rows="3" placeholder="security@example.com">${infosecRecipients}</textarea></div>
+            </div>
+            <div class="th-form-row">
+                <div class="th-form-lbl"><label for="th-infosecSubject">Subject</label></div>
+                <div class="th-form-ctrl"><input type="text" id="th-infosecSubject" name="infosecSubject" value="${infosecSubject}"/></div>
+            </div>
+        </div>
+
+        <div class="th-form-actions">
+            <button class="th-form-btn" type="button" id="th-save-settings">Save settings</button>
+            <span class="th-save-status" id="th-save-status"></span>
+        </div>
+    </div>
+
+    <div class="th-form-card">
+        <div class="th-form-legend">Scope</div>
+        <small class="th-form-card-note">Control which projects and repositories are scanned.
+        When <strong>enabled globally</strong>, everything is scanned except the exclusion lists.
+        When disabled, only explicitly listed projects/repos are scanned.</small>
+        <div class="th-form-rows">
+            <div class="th-form-row">
+                <div class="th-form-lbl">Enable globally
+                    <small>Scan all repositories by default. Uncheck to use an explicit allowlist.</small></div>
+                <div class="th-form-ctrl"><div class="th-form-chk">
+                    <input type="checkbox" id="th-enabledGlobally" name="enabledGlobally" #if ($enabledGlobally) checked="checked" #end/>
+                    <label for="th-enabledGlobally">Enabled</label>
+                </div></div>
+            </div>
+            <div class="th-form-row">
+                <div class="th-form-lbl"><label for="th-enabledProjects">Enabled projects</label>
+                    <small>Project keys to scan when global mode is off (one per line or comma-separated).</small></div>
+                <div class="th-form-ctrl"><textarea id="th-enabledProjects" name="enabledProjects" class="th-textarea" rows="3" placeholder="PROJECT_KEY">${enabledProjects}</textarea></div>
+            </div>
+            <div class="th-form-row">
+                <div class="th-form-lbl"><label for="th-enabledRepositories">Enabled repositories</label>
+                    <small>PROJECT/repo-slug pairs to scan when global mode is off.</small></div>
+                <div class="th-form-ctrl"><textarea id="th-enabledRepositories" name="enabledRepositories" class="th-textarea" rows="3" placeholder="PROJECT/my-repo">${enabledRepositories}</textarea></div>
+            </div>
+            <div class="th-form-row">
+                <div class="th-form-lbl"><label for="th-excludedProjects">Excluded projects</label>
+                    <small>Project keys to always skip (applies when global mode is on).</small></div>
+                <div class="th-form-ctrl"><textarea id="th-excludedProjects" name="excludedProjects" class="th-textarea" rows="3" placeholder="SANDBOX">${excludedProjects}</textarea></div>
+            </div>
+            <div class="th-form-row">
+                <div class="th-form-lbl"><label for="th-excludedRepositories">Excluded repositories</label>
+                    <small>PROJECT/repo-slug pairs to always skip.</small></div>
+                <div class="th-form-ctrl"><textarea id="th-excludedRepositories" name="excludedRepositories" class="th-textarea" rows="3" placeholder="PROJECT/scratch-repo">${excludedRepositories}</textarea></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="th-form-card">
+        <div class="th-form-legend">File exclusions</div>
+        <small class="th-form-card-note">Skip findings from files matching these patterns.
+        Allowlisted paths take precedence over all exclusions.</small>
+        <div class="th-form-rows">
+            <div class="th-form-row">
+                <div class="th-form-lbl"><label for="th-excludedExtensions">Excluded extensions</label>
+                    <small>File extensions to ignore (comma or newline separated, leading dot optional).
+                    Example: <code>.class, .jar, .dll, .exe, .png</code></small></div>
+                <div class="th-form-ctrl"><textarea id="th-excludedExtensions" name="excludedExtensions" class="th-textarea" rows="4">${excludedExtensions}</textarea></div>
+            </div>
+            <div class="th-form-row">
+                <div class="th-form-lbl"><label for="th-excludedDirectories">Excluded directories</label>
+                    <small>Directory path prefixes to ignore (comma or newline separated).
+                    Example: <code>vendor/, node_modules/</code></small></div>
+                <div class="th-form-ctrl"><textarea id="th-excludedDirectories" name="excludedDirectories" class="th-textarea" rows="3">${excludedDirectories}</textarea></div>
+            </div>
+            <div class="th-form-row">
+                <div class="th-form-lbl"><label for="th-allowlistedPaths">Allowlisted paths</label>
+                    <small>Path prefixes that are always scanned, even if matched by an exclusion above.</small></div>
+                <div class="th-form-ctrl"><textarea id="th-allowlistedPaths" name="allowlistedPaths" class="th-textarea" rows="3" placeholder="src/secrets/">${allowlistedPaths}</textarea></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="th-form-card">
+        <div class="th-form-legend">Per-secret allowlist</div>
+        <small class="th-form-card-note">Findings whose fingerprint appears here are permanently silenced — they will never
+        appear in dashboards or trigger notifications. Copy a fingerprint from the findings table, then add it below.</small>
+
+        <div class="th-form-rows">
+            <div class="th-form-row" style="align-items:flex-start">
+                <div class="th-form-lbl">Add to allowlist</div>
+                <div class="th-form-ctrl">
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 16px;margin-bottom:8px">
+                        <div>
+                            <label style="font-size:12px;color:#5e6c84">Fingerprint (SHA-256)</label>
+                            <input type="text" id="th-al-fingerprint" placeholder="Paste fingerprint from findings table" style="width:100%"/>
+                        </div>
+                        <div>
+                            <label style="font-size:12px;color:#5e6c84">Detector name</label>
+                            <input type="text" id="th-al-detector" placeholder="e.g. AWS, Stripe" style="width:100%"/>
+                        </div>
+                        <div>
+                            <label style="font-size:12px;color:#5e6c84">Redacted value (for reference)</label>
+                            <input type="text" id="th-al-redacted" placeholder="e.g. AKIA***" style="width:100%"/>
+                        </div>
+                        <div>
+                            <label style="font-size:12px;color:#5e6c84">Reason</label>
+                            <input type="text" id="th-al-reason" placeholder="e.g. Test credential, already rotated" style="width:100%"/>
+                        </div>
+                    </div>
+                    <button class="th-form-btn" type="button" id="th-al-add">Add to allowlist</button>
+                    <span id="th-al-status" style="margin-left:8px;font-size:12px"></span>
+                </div>
+            </div>
+        </div>
+
+        #if ($allowlistEntries && !$allowlistEntries.isEmpty())
+        <table class="th-table" style="margin-top:12px">
+            <thead><tr>
+                <th>Fingerprint</th><th>Detector</th><th>Redacted</th><th>Reason</th><th>Added by</th><th>Date</th><th></th>
+            </tr></thead>
+            <tbody>
+            #foreach ($entry in $allowlistEntries)
+            <tr data-al-id="${entry.ID}">
+                <td style="font-family:monospace;font-size:11px">${entry.fingerprint.substring(0,12)}…</td>
+                <td>${entry.detectorName}</td>
+                <td>${entry.redacted}</td>
+                <td>${entry.reason}</td>
+                <td>${entry.addedBy}</td>
+                <td style="white-space:nowrap;font-size:12px">#set($d = $entry.addedAt)$d</td>
+                <td><button class="aui-button aui-button-subtle th-al-remove" type="button">Remove</button></td>
+            </tr>
+            #end
+            </tbody>
+        </table>
+        #else
+        <p style="color:#5e6c84;font-size:13px;margin-top:8px">No entries yet.</p>
+        #end
+    </div>
+
+    <div class="th-form-card">
+        <div class="th-form-legend">Push behavior</div>
+        <div class="th-form-rows">
+            <div class="th-form-row">
+                <div class="th-form-lbl">Scan on push
+                    <small>Trigger a TruffleHog scan automatically on every successful push.</small></div>
+                <div class="th-form-ctrl"><div class="th-form-chk">
+                    <input type="checkbox" id="th-scanOnPush" name="scanOnPush" #if ($scanOnPush) checked="checked" #end/>
+                    <label for="th-scanOnPush">Enabled</label>
+                </div></div>
+            </div>
+            <div class="th-form-row">
+                <div class="th-form-lbl">Block pushes with verified secrets
+                    <small>Reject pushes that introduce a newly-verified secret (requires pre-receive hook support).</small></div>
+                <div class="th-form-ctrl"><div class="th-form-chk">
+                    <input type="checkbox" id="th-blockPushOnVerifiedFinding" name="blockPushOnVerifiedFinding" #if ($blockPushOnVerifiedFinding) checked="checked" #end/>
+                    <label for="th-blockPushOnVerifiedFinding">Enabled</label>
+                </div></div>
+            </div>
+            <div class="th-form-row">
+                <div class="th-form-lbl"><label for="th-pushResultMode">Push result mode</label>
+                    <small><strong>Block</strong> — reject the push on the branches that match the block patterns.
+                    <strong>Warn</strong> — allow the push but log findings and send notifications.
+                    <strong>Silent</strong> — scan in background, no notification or blocking.</small></div>
+                <div class="th-form-ctrl">
+                    <select id="th-pushResultMode" name="pushResultMode" class="th-select">
+                        <option value="BLOCK" #if ($pushResultMode == "BLOCK") selected="selected" #end>Block</option>
+                        <option value="WARN"  #if ($pushResultMode == "WARN")  selected="selected" #end>Warn</option>
+                        <option value="SILENT" #if ($pushResultMode == "SILENT") selected="selected" #end>Silent</option>
+                    </select>
+                </div>
+            </div>
+            <div class="th-form-row">
+                <div class="th-form-lbl"><label for="th-blockBranchPatterns">Block branch patterns</label>
+                    <small>Comma-separated list of branch names or glob patterns (e.g. <code>main,master,release/*</code>)
+                    where BLOCK mode applies. Empty = all branches.</small></div>
+                <div class="th-form-ctrl"><input type="text" id="th-blockBranchPatterns" name="blockBranchPatterns" value="${blockBranchPatterns}" placeholder="main,master"/></div>
+            </div>
+            <div class="th-form-row">
+                <div class="th-form-lbl"><label for="th-warnBranchPatterns">Warn branch patterns</label>
+                    <small>Branches that should only WARN even when push result mode is BLOCK.</small></div>
+                <div class="th-form-ctrl"><input type="text" id="th-warnBranchPatterns" name="warnBranchPatterns" value="${warnBranchPatterns}" placeholder="feature/*,dev"/></div>
+            </div>
+            <div class="th-form-row">
+                <div class="th-form-lbl"><label for="th-excludedPusherIds">Excluded pusher usernames</label>
+                    <small>Comma-separated Bitbucket usernames whose pushes are never scanned (e.g. CI service accounts).</small></div>
+                <div class="th-form-ctrl"><input type="text" id="th-excludedPusherIds" name="excludedPusherIds" value="${excludedPusherIds}" placeholder="ci-bot,deploy-user"/></div>
+            </div>
+            <div class="th-form-row">
+                <div class="th-form-lbl"><label for="th-maxFileSizeKb">Max file size (KB)</label>
+                    <small>Files larger than this are skipped. 0 = no limit.</small></div>
+                <div class="th-form-ctrl"><input type="number" min="0" id="th-maxFileSizeKb" name="maxFileSizeKb" value="${maxFileSizeKb}"/></div>
+            </div>
+            <div class="th-form-row">
+                <div class="th-form-lbl"><label for="th-maxTotalSizeMb">Max total scan size (MB)</label>
+                    <small>Abort a repository scan if the total data exceeds this. 0 = no limit.</small></div>
+                <div class="th-form-ctrl"><input type="number" min="0" id="th-maxTotalSizeMb" name="maxTotalSizeMb" value="${maxTotalSizeMb}"/></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="th-form-card">
+        <div class="th-form-legend">Direct SMTP (optional override)</div>
+        <small class="th-form-card-note">When <strong>SMTP host</strong> is set, the plugin bypasses Bitbucket's mail server and connects directly.
+        Leave all fields blank to use the mail server configured in Bitbucket Administration.</small>
+        <div class="th-form-rows">
+            <div class="th-form-row">
+                <div class="th-form-lbl"><label for="th-smtpHost">SMTP host</label></div>
+                <div class="th-form-ctrl"><input type="text" id="th-smtpHost" name="smtpHost" value="${smtpHost}" placeholder="smtp.example.com"/></div>
+            </div>
+            <div class="th-form-row">
+                <div class="th-form-lbl"><label for="th-smtpPort">SMTP port</label></div>
+                <div class="th-form-ctrl"><input type="number" id="th-smtpPort" name="smtpPort" value="${smtpPort}" placeholder="587"/></div>
+            </div>
+            <div class="th-form-row">
+                <div class="th-form-lbl">Use TLS (STARTTLS)</div>
+                <div class="th-form-ctrl"><div class="th-form-chk">
+                    <input type="checkbox" id="th-smtpTls" name="smtpTls" #if ($smtpTls) checked="checked" #end/>
+                    <label for="th-smtpTls">Enabled</label>
+                </div></div>
+            </div>
+            <div class="th-form-row">
+                <div class="th-form-lbl"><label for="th-smtpUser">SMTP username</label></div>
+                <div class="th-form-ctrl"><input type="text" id="th-smtpUser" name="smtpUser" value="${smtpUser}" autocomplete="off"/></div>
+            </div>
+            <div class="th-form-row">
+                <div class="th-form-lbl"><label for="th-smtpPass">SMTP password</label>
+                    <small>Stored encrypted. Leave blank to keep the current value.</small></div>
+                <div class="th-form-ctrl"><input type="password" id="th-smtpPass" name="smtpPass" placeholder="(unchanged)" autocomplete="new-password"/></div>
+            </div>
+            <div class="th-form-row">
+                <div class="th-form-lbl"><label for="th-smtpFromAddress">From address</label>
+                    <small>Override the From header (e.g. <code>trufflehog@company.com</code>). Leave blank to use the SMTP server default.</small></div>
+                <div class="th-form-ctrl"><input type="text" id="th-smtpFromAddress" name="smtpFromAddress" value="${smtpFromAddress}" placeholder="trufflehog@company.com"/></div>
+            </div>
+            <div class="th-form-row">
+                <div class="th-form-lbl">Test email</div>
+                <div class="th-form-ctrl" style="display:flex;gap:8px;align-items:center">
+                    <input type="email" id="th-test-email-to" placeholder="recipient@example.com" style="flex:1"/>
+                    <button class="aui-button" type="button" id="th-test-email-btn">Send test</button>
+                    <span id="th-test-email-status" style="font-size:12px"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="th-form-card">
+        <div class="th-form-legend">Webhook notifications</div>
+        <small class="th-form-card-note">Send a brief alert to Microsoft Teams or Slack whenever new secrets are found.</small>
+        <div class="th-form-rows">
+            <div class="th-form-row">
+                <div class="th-form-lbl"><label for="th-teamsWebhookUrl">Teams webhook URL</label>
+                    <small>Incoming webhook URL from your Teams channel connector.</small></div>
+                <div class="th-form-ctrl" style="display:flex;gap:8px;align-items:center">
+                    <input type="url" id="th-teamsWebhookUrl" name="teamsWebhookUrl" value="${teamsWebhookUrl}" placeholder="https://outlook.office.com/webhook/..." style="flex:1"/>
+                    <button class="aui-button" type="button" id="th-test-teams-btn">Test</button>
+                    <span id="th-test-teams-status" style="font-size:12px"></span>
+                </div>
+            </div>
+            <div class="th-form-row">
+                <div class="th-form-lbl"><label for="th-slackWebhookUrl">Slack webhook URL</label>
+                    <small>Incoming webhook URL from your Slack app configuration.</small></div>
+                <div class="th-form-ctrl" style="display:flex;gap:8px;align-items:center">
+                    <input type="url" id="th-slackWebhookUrl" name="slackWebhookUrl" value="${slackWebhookUrl}" placeholder="https://hooks.slack.com/services/..." style="flex:1"/>
+                    <button class="aui-button" type="button" id="th-test-slack-btn">Test</button>
+                    <span id="th-test-slack-status" style="font-size:12px"></span>
+                </div>
+            </div>
+            <div class="th-form-row">
+                <div class="th-form-lbl"><label for="th-notificationMode">Notification mode</label>
+                    <small><strong>Immediate</strong> — alert fires on every scan that produces new findings.
+                    <strong>Digest</strong> — findings are batched and sent once per day at the configured hour.</small></div>
+                <div class="th-form-ctrl">
+                    <select id="th-notificationMode" name="notificationMode" class="th-select">
+                        <option value="IMMEDIATE" #if ($notificationMode == "IMMEDIATE") selected="selected" #end>Immediate</option>
+                        <option value="DIGEST"    #if ($notificationMode == "DIGEST")    selected="selected" #end>Daily digest</option>
+                    </select>
+                </div>
+            </div>
+            <div class="th-form-row">
+                <div class="th-form-lbl"><label for="th-digestHour">Digest hour (UTC)</label>
+                    <small>Hour of the day (0–23) when the digest is sent.</small></div>
+                <div class="th-form-ctrl"><input type="number" min="0" max="23" id="th-digestHour" name="digestHour" value="${digestHour}"/></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="th-form-card">
+        <div class="th-form-legend">Custom detectors</div>
+        <small class="th-form-card-note">Configure which detectors are warn-only and supply a custom detector config for TruffleHog.</small>
+        <div class="th-form-rows">
+            <div class="th-form-row">
+                <div class="th-form-lbl"><label for="th-warnOnlyDetectors">Warn-only detectors</label>
+                    <small>Findings from these detectors are flagged as warnings — they never block pushes.
+                    Comma or newline separated. Example: <code>Entropy, Generic</code></small></div>
+                <div class="th-form-ctrl"><textarea id="th-warnOnlyDetectors" name="warnOnlyDetectors" class="th-textarea" rows="3" placeholder="Entropy">${warnOnlyDetectors}</textarea></div>
+            </div>
+            <div class="th-form-row">
+                <div class="th-form-lbl"><label for="th-customDetectorConfigPath">Custom detector config path</label>
+                    <small>Absolute path to a TruffleHog <code>--config</code> YAML file on the Bitbucket node(s).
+                    Leave blank to use built-in detectors only.</small></div>
+                <div class="th-form-ctrl"><input type="text" id="th-customDetectorConfigPath" name="customDetectorConfigPath" value="${customDetectorConfigPath}" placeholder="/etc/trufflehog/detectors.yaml"/></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="th-form-card">
+        <div class="th-form-legend">Proxy settings</div>
+        <small class="th-form-card-note">Applied to the TruffleHog process environment so it can reach external APIs for secret verification.</small>
+        <div class="th-form-rows">
+            <div class="th-form-row">
+                <div class="th-form-lbl"><label for="th-proxyUrl">HTTP/HTTPS proxy URL</label>
+                    <small>e.g. <code>http://proxy.corp.local:3128</code>. Sets both HTTP_PROXY and HTTPS_PROXY.</small></div>
+                <div class="th-form-ctrl"><input type="text" id="th-proxyUrl" name="proxyUrl" value="${proxyUrl}" placeholder="http://proxy.corp.local:3128"/></div>
+            </div>
+            <div class="th-form-row">
+                <div class="th-form-lbl"><label for="th-proxyNoProxy">No-proxy hosts</label>
+                    <small>Comma-separated hostnames or CIDR ranges that bypass the proxy. Sets NO_PROXY.</small></div>
+                <div class="th-form-ctrl"><input type="text" id="th-proxyNoProxy" name="proxyNoProxy" value="${proxyNoProxy}" placeholder="localhost,127.0.0.1,.corp.local"/></div>
+            </div>
+            <div class="th-form-row">
+                <div class="th-form-lbl"><label for="th-proxyUser">Proxy username</label></div>
+                <div class="th-form-ctrl"><input type="text" id="th-proxyUser" name="proxyUser" value="${proxyUser}" autocomplete="off"/></div>
+            </div>
+            <div class="th-form-row">
+                <div class="th-form-lbl"><label for="th-proxyPass">Proxy password</label>
+                    <small>Stored encrypted. Leave blank to keep the current value.</small></div>
+                <div class="th-form-ctrl"><input type="password" id="th-proxyPass" name="proxyPass" placeholder="(unchanged)" autocomplete="new-password"/></div>
+            </div>
+            <div class="th-form-row">
+                <div class="th-form-lbl"><label for="th-proxySslCertPath">Custom SSL certificate</label>
+                    <small>Path to a PEM/CRT file for a self-signed CA on your proxy. Sets SSL_CERT_FILE.</small></div>
+                <div class="th-form-ctrl"><input type="text" id="th-proxySslCertPath" name="proxySslCertPath" value="${proxySslCertPath}" placeholder="/etc/ssl/certs/proxy-ca.crt"/></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="th-form-card">
+        <div class="th-form-legend">Data Center — per-node binary paths</div>
+        <small class="th-form-card-note">In clustered Data Center deployments each node may have TruffleHog installed at a different path.
+        Enter one <code>nodeName=path</code> mapping per line. The node name must match the value Bitbucket reports as its cluster node ID.
+        If a node has no entry the global <strong>Executable path</strong> is used.</small>
+        <div class="th-form-rows">
+            <div class="th-form-row">
+                <div class="th-form-lbl"><label for="th-perNodeBinaryPaths">Node binary paths</label></div>
+                <div class="th-form-ctrl"><textarea id="th-perNodeBinaryPaths" name="perNodeBinaryPaths" class="th-textarea" rows="4" placeholder="node1=/usr/local/bin/trufflehog&#10;node2=/opt/trufflehog/bin/trufflehog">${perNodeBinaryPaths}</textarea></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="th-form-card">
+        <div class="th-form-legend">Config export / import</div>
+        <small class="th-form-card-note">Export the current settings as a JSON file (passwords are omitted) or import a previously exported file.
+        The import will not overwrite SMTP or proxy passwords unless they are present in the file.</small>
+        <div class="th-form-rows">
+            <div class="th-form-row">
+                <div class="th-form-lbl">Export</div>
+                <div class="th-form-ctrl">
+                    <a class="aui-button" id="th-export-btn" href="#">Download trufflehog-config.json</a>
+                </div>
+            </div>
+            <div class="th-form-row">
+                <div class="th-form-lbl">Import</div>
+                <div class="th-form-ctrl" style="display:flex;gap:8px;align-items:center">
+                    <input type="file" id="th-import-file" accept=".json" style="flex:1"/>
+                    <button class="aui-button" type="button" id="th-import-btn">Import</button>
+                    <span id="th-import-status" style="font-size:12px"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="th-form-card">
+        <div class="th-form-legend">Audit log</div>
+        <small class="th-form-card-note">Recent administrative actions performed by the plugin or via the admin UI. Limited to the 50 most recent entries.</small>
+        #if ($auditLog && !$auditLog.isEmpty())
+        <table class="th-table" style="margin-top:12px">
+            <thead><tr>
+                <th>When</th><th>Action</th><th>Actor</th><th>Entity</th><th>Detail</th>
+            </tr></thead>
+            <tbody>
+            #foreach ($entry in $auditLog)
+            <tr>
+                <td style="white-space:nowrap;font-size:12px">#set($ts = $entry.occurredAt)$ts</td>
+                <td>${entry.action}</td>
+                <td>${entry.actor}</td>
+                <td>${entry.entityType}#if ($entry.entityId && $entry.entityId != "")&nbsp;/&nbsp;${entry.entityId}#end</td>
+                <td style="font-size:12px;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${entry.detail}</td>
+            </tr>
+            #end
+            </tbody>
+        </table>
+        #else
+        <p style="color:#5e6c84;font-size:13px;margin-top:8px">No audit entries yet.</p>
+        #end
+    </div>
+
+</form>
+</div>
+
+<script>
+window.TRUFFLEHOG_CONTEXT = {
+    restBase: '${restBase}',
+    contextPath: '${contextPath}'
+};
+</script>
+<script src="${contextPath}/download/resources/com.acme.bitbucket.trufflehog:trufflehog-admin-resources/admin.js"></script>
+</body>
+</html>

@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<atlassian-plugin key="com.acme.bitbucket.trufflehog" name="TruffleHog Secret Scanner" plugins-version="2">
+    <plugin-info>
+        <description>TruffleHog OSS integration for Bitbucket Data Center with system, project and repository dashboards, scheduled and on-push scanning, and a remediation workflow.</description>
+        <version>${project.version}</version>
+        <vendor name="${project.organization.name}" url="${project.organization.url}"/>
+    </plugin-info>
+
+    <!-- i18n -->
+    <resource type="i18n" name="i18n" location="trufflehog-dashboard"/>
+
+    <!-- Active Objects entities (cluster-safe storage) -->
+    <ao key="ao-module">
+        <description>Persistence for findings, scan runs, configuration, and remediation events.</description>
+        <entity>com.acme.bitbucket.trufflehog.ao.AoSecretFinding</entity>
+        <entity>com.acme.bitbucket.trufflehog.ao.AoScanRun</entity>
+        <entity>com.acme.bitbucket.trufflehog.ao.AoScanConfig</entity>
+        <entity>com.acme.bitbucket.trufflehog.ao.AoRemediationEvent</entity>
+        <entity>com.acme.bitbucket.trufflehog.ao.AoSecretAllowlistEntry</entity>
+        <entity>com.acme.bitbucket.trufflehog.ao.AoAuditLogEntry</entity>
+    </ao>
+
+    <!-- REST module -->
+    <rest key="trufflehog-rest" path="/th-scanner" version="1.0">
+        <description>TruffleHog REST API</description>
+        <package>com.acme.bitbucket.trufflehog.rest</package>
+    </rest>
+
+    <!-- Servlets: dashboards + admin -->
+    <servlet key="system-dashboard-servlet" name="System Dashboard" class="bean:systemDashboardServlet">
+        <url-pattern>/trufflehog/dashboard/system</url-pattern>
+    </servlet>
+    <servlet key="project-dashboard-servlet" name="Project Dashboard" class="bean:projectDashboardServlet">
+        <url-pattern>/trufflehog/dashboard/project</url-pattern>
+    </servlet>
+    <servlet key="repository-dashboard-servlet" name="Repository Dashboard" class="bean:repositoryDashboardServlet">
+        <url-pattern>/trufflehog/dashboard/repository</url-pattern>
+    </servlet>
+    <servlet key="admin-config-servlet" name="Admin Config" class="bean:adminConfigServlet">
+        <url-pattern>/trufflehog/admin</url-pattern>
+    </servlet>
+
+    <!-- Post-receive scan hook -->
+    <repository-hook key="trufflehog-post-receive-hook" name="TruffleHog Secret Scan on Push"
+                     class="bean:postReceiveScanHook"
+                     icon="images/pluginIcon.png">
+        <description>Scans pushed commits for leaked secrets and writes findings to the TruffleHog dashboard.</description>
+        <scopes>
+            <scope>repository</scope>
+            <scope>project</scope>
+        </scopes>
+    </repository-hook>
+
+    <!-- Admin web items (Bitbucket admin -> Security) -->
+    <web-section key="trufflehog-admin-section" location="atl.admin" weight="300">
+        <label key="trufflehog.admin.section"/>
+    </web-section>
+
+    <web-item key="trufflehog-system-dashboard-link" section="atl.admin/trufflehog-admin-section" weight="10">
+        <label key="trufflehog.system.dashboard"/>
+        <link linkId="trufflehog-system-dashboard-link">/plugins/servlet/trufflehog/dashboard/system</link>
+        <conditions type="AND">
+            <condition class="com.atlassian.bitbucket.web.conditions.HasGlobalPermissionCondition">
+                <param name="permission">ADMIN</param>
+            </condition>
+        </conditions>
+    </web-item>
+    <web-item key="trufflehog-admin-settings-link" section="atl.admin/trufflehog-admin-section" weight="20">
+        <label key="trufflehog.admin.settings"/>
+        <link linkId="trufflehog-admin-settings-link">/plugins/servlet/trufflehog/admin</link>
+        <conditions type="AND">
+            <condition class="com.atlassian.bitbucket.web.conditions.HasGlobalPermissionCondition">
+                <param name="permission">SYS_ADMIN</param>
+            </condition>
+        </conditions>
+    </web-item>
+
+    <!-- Project-level tab -->
+    <web-item key="trufflehog-project-tab" section="bitbucket.project.nav" weight="50">
+        <label key="trufflehog.project.tab"/>
+        <link linkId="trufflehog-project-tab">/plugins/servlet/trufflehog/dashboard/project?projectKey=${project.key}</link>
+        <conditions type="AND">
+            <condition class="com.atlassian.bitbucket.web.conditions.HasProjectPermissionCondition">
+                <param name="permission">PROJECT_READ</param>
+            </condition>
+        </conditions>
+    </web-item>
+
+    <!-- Repository-level tab -->
+    <web-item key="trufflehog-repository-tab" section="bitbucket.repository.nav" weight="50">
+        <label key="trufflehog.repository.tab"/>
+        <link linkId="trufflehog-repository-tab">/plugins/servlet/trufflehog/dashboard/repository?projectKey=${repository.project.key}&amp;repositorySlug=${repository.slug}</link>
+        <conditions type="AND">
+            <condition class="com.atlassian.bitbucket.web.conditions.HasRepositoryPermissionCondition">
+                <param name="permission">REPO_READ</param>
+            </condition>
+        </conditions>
+    </web-item>
+
+    <!-- Web resources for the dashboards -->
+    <web-resource key="trufflehog-dashboard-resources" name="TruffleHog Dashboard Resources">
+        <dependency>com.atlassian.auiplugin:ajs</dependency>
+        <dependency>com.atlassian.auiplugin:aui-experimental-tables</dependency>
+        <dependency>com.atlassian.auiplugin:aui-spinner</dependency>
+        <dependency>com.atlassian.auiplugin:dialog2</dependency>
+        <dependency>com.atlassian.auiplugin:flag</dependency>
+        <dependency>com.atlassian.auiplugin:lozenge</dependency>
+        <resource type="download" name="chart.umd.min.js" location="js/vendor/chart.umd.min.js"/>
+        <resource type="download" name="charts.js" location="js/charts.js"/>
+        <resource type="download" name="th-dashboard.js" location="js/th-dashboard.js"/>
+        <resource type="download" name="finding-actions.js" location="js/finding-actions.js"/>
+        <resource type="download" name="th-dashboard.css" location="css/th-dashboard.css"/>
+        <context>atl.general</context>
+    </web-resource>
+
+    <!-- Web resources for admin page -->
+    <web-resource key="trufflehog-admin-resources" name="TruffleHog Admin Resources">
+        <dependency>com.atlassian.auiplugin:ajs</dependency>
+        <dependency>com.atlassian.auiplugin:flag</dependency>
+        <resource type="download" name="admin.js" location="js/admin.js"/>
+        <resource type="download" name="th-dashboard.css" location="css/th-dashboard.css"/>
+        <context>atl.admin</context>
+    </web-resource>
+</atlassian-plugin>

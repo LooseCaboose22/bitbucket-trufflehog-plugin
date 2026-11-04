@@ -1,0 +1,109 @@
+<html>
+<head>
+    <title>$pageTitle</title>
+    <meta name="decorator" content="atl.admin"/>
+    <meta name="admin.menu.section" content="atl.admin/trufflehog-admin-section"/>
+    <meta name="admin.menu.item" content="trufflehog-system-dashboard-link"/>
+    <link rel="stylesheet" href="${contextPath}/download/resources/com.acme.bitbucket.trufflehog:trufflehog-dashboard-resources/th-dashboard.css"/>
+</head>
+<body>
+
+<div class="th-page-bar">
+    <div>
+        <h2 class="th-page-h2">$pageTitle</h2>
+    </div>
+    <div class="th-actions">
+        #if ($canRemediate)
+        <button id="th-scan-all" class="aui-button aui-button-primary">Scan all repositories</button>
+        #end
+        <button id="th-refresh" class="aui-button">&#8635; Refresh</button>
+        <a class="aui-button" href="${contextPath}/plugins/servlet/trufflehog/admin">&#9881; Settings</a>
+    </div>
+</div>
+
+<div class="th-container">
+    <section id="th-summary" class="th-summary"></section>
+
+    <section class="th-grid">
+        <div class="th-panel"><div class="th-panel-head"><h2>By severity</h2></div><div id="th-chart-severity" class="th-chart"></div></div>
+        <div class="th-panel"><div class="th-panel-head"><h2>Top secret types</h2></div><div id="th-chart-detector" class="th-chart"></div></div>
+        <div class="th-panel"><div class="th-panel-head"><h2>Open findings trend</h2></div><div id="th-chart-trend" class="th-chart"></div></div>
+        <div class="th-panel"><div class="th-panel-head"><h2>New vs remediated</h2></div><div id="th-chart-activity" class="th-chart"></div></div>
+    </section>
+
+    <section class="th-panel">
+        <div class="th-panel-head"><h2>Projects</h2></div>
+        <div id="th-projects"></div>
+    </section>
+
+    <section class="th-panel">
+        <div class="th-panel-head"><h2>Top repositories</h2></div>
+        <div id="th-top-repos"></div>
+    </section>
+
+    <section class="th-panel">
+        <div class="th-panel-head"><h2>Findings</h2></div>
+        <div class="th-filter-bar">
+            <div class="th-search-wrap">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="5.5" cy="5.5" r="4" stroke="currentColor" stroke-width="1.5"/><path d="M9 9l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                <input type="text" id="th-filter-search" class="th-search-input" placeholder="Search file, detector, project&#8230;"/>
+            </div>
+            <select id="th-filter-status" class="th-select">
+                <option value="">All statuses</option>
+                <option value="OPEN" selected="selected">Open</option>
+                <option value="FIXED">Fixed</option>
+                <option value="FALSE_POSITIVE">False positive</option>
+                <option value="ACCEPTED_RISK">Accepted risk</option>
+            </select>
+            <span class="th-fdivider"></span>
+            <label class="th-chk-label"><input type="checkbox" id="th-filter-verified"/> Verified only</label>
+        </div>
+        <table class="th-table"><thead><tr>
+            <th class="th-sortable" data-col="severity">Severity <span class="th-sort-icon">&#8597;</span></th>
+            <th>Detector</th><th>Project</th>
+            <th class="th-sortable" data-col="repositorySlug">Repository <span class="th-sort-icon">&#8597;</span></th>
+            <th>File</th><th>Branch</th>
+            <th class="th-sortable th-sort-active" data-col="lastSeenAt">Last seen <span class="th-sort-icon">&#8595;</span></th>
+            <th class="th-sortable" data-col="status">Status <span class="th-sort-icon">&#8597;</span></th>
+            <th></th>
+        </tr></thead><tbody id="th-findings"></tbody></table>
+        <div class="th-pager">
+            <span id="th-pageinfo"></span>
+            <button id="th-prev" class="th-btn" disabled="disabled">&#8592; Prev</button>
+            <button id="th-next" class="th-btn">Next &#8594;</button>
+        </div>
+    </section>
+
+    <section class="th-panel">
+        <div class="th-panel-head"><h2>Recent scans</h2></div>
+        <table class="th-scans-table"><thead><tr>
+            <th>When</th><th>Trigger</th><th>Repository</th><th>Status</th>
+            <th class="td-num">Found</th><th class="td-num">New</th><th class="td-num">Verified</th><th>Duration</th>
+        </tr></thead><tbody id="th-scans"></tbody></table>
+    </section>
+</div>
+
+<aside id="th-drawer" class="th-drawer th-drawer--closed">
+    <div class="th-drawer-head">
+        <h2 id="th-drawer-title">Finding detail</h2>
+        <button id="th-drawer-close" class="th-drawer-close" title="Close">&times;</button>
+    </div>
+    <div id="th-drawer-body"></div>
+</aside>
+
+<script>
+window.TRUFFLEHOG_CONTEXT = {
+    scope: '${scope}',
+    projectKey: '${projectKey}',
+    repositorySlug: '${repositorySlug}',
+    canRemediate: ${canRemediate},
+    contextPath: '${contextPath}',
+    restBase: '${restBase}'
+};
+</script>
+<script src="${contextPath}/download/resources/com.acme.bitbucket.trufflehog:trufflehog-dashboard-resources/chart.umd.min.js"></script>
+<script src="${contextPath}/download/resources/com.acme.bitbucket.trufflehog:trufflehog-dashboard-resources/charts.js"></script>
+<script src="${contextPath}/download/resources/com.acme.bitbucket.trufflehog:trufflehog-dashboard-resources/finding-actions.js"></script>
+<script src="${contextPath}/download/resources/com.acme.bitbucket.trufflehog:trufflehog-dashboard-resources/th-dashboard.js"></script>
+</body>
+</html>

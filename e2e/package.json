@@ -1,0 +1,19 @@
+{
+  "name": "trufflehog-plugin-e2e",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "test": "playwright test",
+    "test:api": "playwright test tests/api.spec.ts",
+    "test:dashboard": "playwright test tests/dashboard.spec.ts",
+    "test:findings": "playwright test tests/findings.spec.ts",
+    "test:admin": "playwright test tests/admin.spec.ts",
+    "test:headed": "playwright test --headed",
+    "test:debug": "playwright test --debug",
+    "report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.44.0",
+    "@types/node": "^20.0.0"
+  }
+}
